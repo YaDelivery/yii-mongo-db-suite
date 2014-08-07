@@ -103,7 +103,7 @@ class EMongoHttpSession extends CHttpSession
     $this->setCollection($this->collectionName);
     $this->_options = array(
       'fsync' => $this->fsync,
-      'safe'  => $this->safe
+      'w'  => (int)$this->safe
     );
     if (!is_null($this->timeout))
     {
