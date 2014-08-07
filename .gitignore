@@ -3,3 +3,7 @@
 .buildpath
 .settings
 .project
+.idea/
+build/
+vendor/
+composer.lock

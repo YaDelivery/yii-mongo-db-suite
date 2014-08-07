@@ -1,19 +1,34 @@
 {
-    "name": "kozz/YiiMongoDbSuite",
-    "description": "Almost complete, ActiveRecord like support for MongoDB",
-    "license": "MIT",
-    "authors": [
-        {
-            "name": "Dariusz Górecki",
-        }
-    ],
-    "autoload": {
-        "classmap": [
-            "lib-extra/",
-            "lib/"
-        ]
+  "name": "kozz/YiiMongoDbSuite",
+  "description": "Almost complete, ActiveRecord like support for MongoDB",
+  "license": "BSD-3-Clause",
+  "authors": [
+    {
+      "name": "Dariusz Górecki"
     },
-    "require": {
-
+    {
+      "name": "Yury Kozyrev"
     }
+  ],
+  "autoload": {
+    "classmap": [
+      "lib-extra/",
+      "lib/"
+    ]
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Kozz\\Tests\\": "tests/"
+    }
+  },
+  "require": {
+    "yiisoft/yii": "~1.1"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "~4.0",
+    "phpunit/phpunit-story": "*",
+    "phpunit/phpunit-selenium":"*",
+    "phpunit/dbunit":"*",
+    "phpunit/php-invoker":"*"
+  }
 }
