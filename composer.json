@@ -1,0 +1,19 @@
+{
+    "name": "kozz/YiiMongoDbSuite",
+    "description": "Almost complete, ActiveRecord like support for MongoDB",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Dariusz Górecki",
+        }
+    ],
+    "autoload": {
+        "classmap": [
+            "lib-extra/",
+            "lib/"
+        ]
+    },
+    "require": {
+
+    }
+}
