@@ -1,5 +1,5 @@
 {
-  "name": "kozz/YiiMongoDbSuite",
+  "name": "kozz/yii-mongo-db-suite",
   "description": "Almost complete, ActiveRecord like support for MongoDB",
   "license": "BSD-3-Clause",
   "authors": [
