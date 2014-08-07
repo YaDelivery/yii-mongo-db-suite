@@ -13,7 +13,8 @@
   "autoload": {
     "classmap": [
       "lib-extra/",
-      "lib/"
+      "lib/",
+      "validators/"
     ]
   },
   "autoload-dev": {

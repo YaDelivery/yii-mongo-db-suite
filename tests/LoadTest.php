@@ -21,10 +21,17 @@ class LoadTest extends PHPUnit_Framework_TestCase
     $this->assertTrue(class_exists('EMongoGridFS'));
     $this->assertTrue(class_exists('EMongoModifier'));
     $this->assertTrue(class_exists('EMongoSoftDocument'));
+    $this->assertTrue(class_exists('EMongoCacheDependency'));
+    $this->assertTrue(class_exists('EMongoHttpSession'));
+    $this->assertTrue(class_exists('EMongoLogRoute'));
+    $this->assertTrue(class_exists('EMongoSort'));
 
     $this->assertTrue(class_exists('EEmbeddedArraysBehavior'));
     $this->assertTrue(class_exists('EMongoPartialDocument'));
     $this->assertTrue(class_exists('EMongoUniqueValidator'));
+
+    $this->assertTrue(class_exists('CMongoUniqueValidator'));
+    $this->assertTrue(class_exists('EMongoExistsValidator'));
 
   }
 
