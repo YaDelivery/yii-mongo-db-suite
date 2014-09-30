@@ -70,7 +70,7 @@ class EMongoDB extends CApplicationComponent
   private $_mongoDb;
 
   /**
-   * @var Mongo $_mongoConnection instance of MongoDB driver
+   * @var MongoClient $_mongoConnection instance of MongoDB driver
    */
   private $_mongoConnection;
 
@@ -119,19 +119,20 @@ class EMongoDB extends CApplicationComponent
    * Connect to DB if connection is already connected this method does nothing
    *
    * @since v1.0
+   * @return boolean
    */
   public function connect()
   {
-    if (!$this->getConnection()->connected)
+    if (!$this->getConnection()->getHosts())
     {
       return $this->getConnection()->connect();
     }
   }
 
   /**
-   * Returns Mongo connection instance if not exists will create new
+   * Returns MongoClient connection instance if not exists will create new
    *
-   * @return Mongo
+   * @return MongoClient
    * @throws EMongoException
    * @since v1.0
    */
@@ -198,7 +199,8 @@ class EMongoDB extends CApplicationComponent
   /**
    * Get MongoDB instance
    *
-   * @since v1.0
+   * @return MongoDB
+   * @throws EMongoException
    */
   public function getDbInstance()
   {

@@ -35,4 +35,19 @@ class LoadTest extends PHPUnit_Framework_TestCase
 
   }
 
+  public function testConnection()
+  {
+    $mongo = new \EMongoDB();
+    $mongo->connectionString = 'mongodb://127.0.0.1';
+    $mongo->dbName = 'test';
+
+    $mongo->connect();
+    $connection = $mongo->getConnection();
+    $this->assertInstanceOf('MongoClient', $connection);
+
+    $this->assertInstanceOf('MongoDB', $connection->selectDB('test'));
+    $this->assertInstanceOf('MongoDB', $mongo->getDbInstance());
+    $this->assertInstanceOf('MongoCollection', $mongo->getDbInstance()->selectCollection('testCollection'));
+  }
+
 }
