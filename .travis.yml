@@ -15,6 +15,9 @@ before_script:
 after_script:
   - php vendor/bin/coveralls -v
 
+notifications:
+   email: false
+
 matrix:
   allow_failures:
     - php: hhvm
