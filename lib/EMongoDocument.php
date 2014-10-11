@@ -1530,41 +1530,56 @@ abstract class EMongoDocument extends EMongoEmbeddedDocument
 
     foreach ($this->getSafeAttributeNames() as $attribute)
     {
-      if ($this->$attribute !== null && $this->$attribute !== '')
-      {
-        if (is_array($this->$attribute) || is_object($this->$attribute))
-        {
-          $criteria->$attribute = $this->$attribute;
-        }
-        else
-        {
-          if (preg_match('/^(?:\s*(<>|<=|>=|<|>|=|!=|==))?(.*)$/', $this->$attribute, $matches))
-          {
-            $op    = $matches[1];
-            $value = $matches[2];
-
-            if ($op === '=')
-            {
-              $op = '==';
-            }
-
-            if ($op !== '')
-            {
-              call_user_func(array($criteria, $attribute), $op, is_numeric($value) ? floatval($value) : $value);
-            }
-            else
-            {
-              $criteria->$attribute =
-                new MongoRegex($caseSensitive ? '/' . $this->$attribute . '/' : '/' . $this->$attribute . '/i');
-            }
-          }
-        }
-      }
+      $this->appendAttributeCriteria($criteria, $attribute, $caseSensitive);
     }
 
     $this->setDbCriteria($criteria);
 
     return new EMongoDocumentDataProvider($this);
+  }
+
+  private function appendAttributeCriteria(EMongoCriteria $criteria, $attribute, $caseSensitive = false)
+  {
+    if ($this->$attribute === null || $this->$attribute === '')
+    {
+      return;
+    }
+
+    if (is_array($this->$attribute) || is_object($this->$attribute))
+    {
+      $criteria->$attribute = $this->$attribute;
+    }
+    elseif (preg_match('/^(?:\s*(<>|<=|>=|<|>|=|!=|==))?(.*)$/', $this->$attribute, $matches))
+    {
+      $op    = $matches[1];
+      $value = $matches[2];
+
+      if ($op === '=')
+      {
+        $op = '==';
+      }
+
+      if ($op !== '')
+      {
+        call_user_func(array($criteria, $attribute), $op, is_numeric($value) ? floatval($value) : $value);
+      }
+      else
+      {
+        $criteria->$attribute = $this->getMongoRegex($attribute, $caseSensitive);
+      }
+    }
+  }
+
+
+  /**
+   * @param      $attribute
+   * @param bool $caseSensitive
+   * @return MongoRegex
+   */
+  private function getMongoRegex($attribute, $caseSensitive = false)
+  {
+    $i = $caseSensitive ? 'i' : null;
+    new MongoRegex('/' . $this->$attribute . '/' . $i);
   }
 
   /**
@@ -1625,20 +1640,10 @@ abstract class EMongoDocument extends EMongoEmbeddedDocument
         {
           if ((strlen($value) === 24) && !$value instanceof MongoId)
           {
-            // Assumption: if dealing with _id field and it's a 24-digit string .. should be an Mongo ObjectID
-            Yii::trace(
-              get_class($this) . ".createPkCriteria() .. converting key value ($value) to MongoId",
-              'ext.MongoDb.EMongoDocument'
-            );
             $pk[$key] = new MongoId($value);
           }
           elseif (is_numeric($value))
           {
-            // Assumption: need to bless as int, as string != int when looking up primary keys
-            Yii::trace(
-              get_class($this) . ".createPkCriteria() .. casting ($value) to int",
-              'ext.MongoDb.EMongoDocument'
-            );
             $pk[$key] = (int)$value;
           }
         }
@@ -1653,31 +1658,28 @@ abstract class EMongoDocument extends EMongoEmbeddedDocument
         $criteria->{$pkField}('in', $pk);
       }
     }
-    else
+    elseif (is_array($pkField))
     {
-      if (is_array($pkField))
+      if (!$multiple)
       {
-        if (!$multiple)
+        for ($i = 0; $i < count($pkField); $i++)
         {
-          for ($i = 0; $i < count($pkField); $i++)
+          $pkField = $pk[$i];
+          if ('_id' === $pkField[$i] && !$pk[$i] instanceof MongoId)
           {
-            $pkField = $pk[$i];
-            if ('_id' === $pkField[$i] && !$pk[$i] instanceof MongoId)
-            {
-              $pk[$i] = new MongoId($pk[$i]);
-            }
-            $criteria->{$pkField[$i]} = $pk[$i];
+            $pk[$i] = new MongoId($pk[$i]);
           }
-        }
-        else
-        {
-          throw new EMongoException(Yii::t(
-                                      'yii',
-                                      'Cannot create PK criteria for multiple composite key\'s (not implemented yet)'
-                                    ));
+          $criteria->{$pkField[$i]} = $pk[$i];
         }
       }
+      else
+      {
+        throw new EMongoException(
+          Yii::t('yii', 'Cannot create PK criteria for multiple composite key\'s (not implemented yet)')
+        );
+      }
     }
+
 
     return $criteria;
   }
