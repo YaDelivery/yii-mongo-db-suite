@@ -169,6 +169,7 @@ class EMongoCriteria extends CComponent
    *
    * @param array|EMongoCriteria $criteria
    *
+   * @return $this
    * @since v1.0
    */
   public function mergeWith($criteria)
@@ -249,6 +250,11 @@ class EMongoCriteria extends CComponent
    *
    * @see   CComponent::__call()
    * @since v1.0
+   *
+   * @param string $fieldName
+   * @param array  $parameters
+   *
+   * @return $this|mixed|void
    */
   public function __call($fieldName, $parameters)
   {
@@ -295,6 +301,10 @@ class EMongoCriteria extends CComponent
 
   /**
    * @since v1.0.2
+   *
+   * @param string $name
+   *
+   * @return $this|mixed|void
    */
   public function __get($name)
   {
@@ -305,6 +315,11 @@ class EMongoCriteria extends CComponent
 
   /**
    * @since v1.0.2
+   *
+   * @param string $name
+   * @param mixed  $value
+   *
+   * @return mixed|void
    */
   public function __set($name, $value)
   {
@@ -327,6 +342,8 @@ class EMongoCriteria extends CComponent
 
   /**
    * @since v1.0
+   *
+   * @param array $conditions
    */
   public function setConditions(array $conditions)
   {
@@ -343,6 +360,8 @@ class EMongoCriteria extends CComponent
 
   /**
    * @since v1.0
+   *
+   * @param $limit
    */
   public function setLimit($limit)
   {
@@ -359,6 +378,8 @@ class EMongoCriteria extends CComponent
 
   /**
    * @since v1.0
+   *
+   * @param $offset
    */
   public function setOffset($offset)
   {
@@ -375,6 +396,8 @@ class EMongoCriteria extends CComponent
 
   /**
    * @since v1.0
+   *
+   * @param array $sort
    */
   public function setSort(array $sort)
   {
@@ -391,6 +414,8 @@ class EMongoCriteria extends CComponent
 
   /**
    * @since v1.3.7
+   *
+   * @param $useCursor
    */
   public function setUseCursor($useCursor)
   {
@@ -400,10 +425,8 @@ class EMongoCriteria extends CComponent
   /**
    * Return selected fields
    *
-   * @param boolean $forCursor MongoCursor::fields() method requires
-   *                           the fields to be specified as a hashmap. When this parameter is set
-   *                           to true, then we'll return the fields in this format.
    *
+   * @return array
    * @since v1.3.1
    */
   public function getSelect()
@@ -413,6 +436,8 @@ class EMongoCriteria extends CComponent
 
   /**
    * @since v1.3.1
+   *
+   * @param array $select
    */
   public function setSelect(array $select)
   {
@@ -453,6 +478,7 @@ class EMongoCriteria extends CComponent
    *
    * @param array $fieldList list of fields to select
    *
+   * @return $this
    * @since v1.0
    */
   public function select(array $fieldList = null)
@@ -471,6 +497,7 @@ class EMongoCriteria extends CComponent
    *
    * @param integer $limit limit
    *
+   * @return $this
    * @since v1.0
    */
   public function limit($limit)
@@ -486,6 +513,7 @@ class EMongoCriteria extends CComponent
    *
    * @param integer $offset offset
    *
+   * @return $this
    * @since v1.0
    */
   public function offset($offset)
@@ -502,6 +530,7 @@ class EMongoCriteria extends CComponent
    * @param string  $fieldName
    * @param integer $order
    *
+   * @return $this
    * @since v1.0
    */
   public function sort($fieldName, $order)
@@ -520,6 +549,7 @@ class EMongoCriteria extends CComponent
    * @param string $op operator
    * @param mixed  $value
    *
+   * @return $this
    * @since v1.0
    */
   public function addCond($fieldName, $op, $value)

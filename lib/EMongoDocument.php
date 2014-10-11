@@ -148,7 +148,7 @@ abstract class EMongoDocument extends EMongoEmbeddedDocument
   {
     if (self::$_emongoDb === null)
     {
-      self::$_emongoDb = Yii::app()->getComponent('mongodb');
+      self::setMongoDBComponent(Yii::app()->getComponent('mongodb'));
     }
 
     return self::$_emongoDb;
@@ -161,7 +161,7 @@ abstract class EMongoDocument extends EMongoEmbeddedDocument
    *
    * @since v1.0
    */
-  public function setMongoDBComponent(EMongoDB $component)
+  protected static function setMongoDBComponent(EMongoDB $component)
   {
     self::$_emongoDb = $component;
   }
@@ -200,7 +200,7 @@ abstract class EMongoDocument extends EMongoEmbeddedDocument
   {
     if (!isset(self::$_collections[$this->getCollectionName()]))
     {
-      self::$_collections[$this->getCollectionName()] = $this->getDb()->selectCollection($this->getCollectionName());
+      $this->setCollection($this->getDb()->selectCollection($this->getCollectionName()));
     }
 
     return self::$_collections[$this->getCollectionName()];
@@ -281,16 +281,13 @@ abstract class EMongoDocument extends EMongoEmbeddedDocument
     {
       $this->_criteria = new EMongoCriteria($criteria);
     }
+    elseif ($criteria instanceof EMongoCriteria)
+    {
+      $this->_criteria = $criteria;
+    }
     else
     {
-      if ($criteria instanceof EMongoCriteria)
-      {
-        $this->_criteria = $criteria;
-      }
-      else
-      {
-        $this->_criteria = new EMongoCriteria();
-      }
+      $this->_criteria = new EMongoCriteria();
     }
   }
 
@@ -587,6 +584,7 @@ abstract class EMongoDocument extends EMongoEmbeddedDocument
    *
    * @param EMongoCriteria|array $criteria the query criteria. This parameter may be modified by merging {@link dbCriteria}.
    *
+   * @throws EMongoException
    * @since v1.2.2
    */
   public function applyScopes(&$criteria)
@@ -674,10 +672,9 @@ abstract class EMongoDocument extends EMongoEmbeddedDocument
   {
     if (!$this->getIsNewRecord())
     {
-      throw new EMongoException(Yii::t(
-                                  'yii',
-                                  'The EMongoDocument cannot be inserted to database because it is not new.'
-                                ));
+      throw new EMongoException(
+        Yii::t('yii', 'The EMongoDocument cannot be inserted to database because it is not new.')
+      );
     }
 
     if ($this->beforeSave())
@@ -823,10 +820,9 @@ abstract class EMongoDocument extends EMongoEmbeddedDocument
 
         return true;
       }
-      throw new EMongoException(Yii::t(
-                                  'yii',
-                                  'Can\t save the document to disk, or attempting to save an empty document.'
-                                ));
+      throw new EMongoException(
+        Yii::t('yii', 'Can\t save the document to disk, or attempting to save an empty document.')
+      );
     }
   }
 
@@ -923,8 +919,9 @@ abstract class EMongoDocument extends EMongoEmbeddedDocument
    * See {@link find()} for detailed explanation about $condition and $params.
    *
    * @param mixed                $pk        primary key value(s). Use array for multiple primary keys. For composite key, each key value must be an array (column name=>column value).
-   * @param array|EMongoCriteria $condition query criteria.
+   * @param array|EMongoCriteria $criteria query criteria.
    *
+   * @return mixed
    * @since v1.0
    */
   public function deleteByPk($pk, $criteria = null)
@@ -1440,6 +1437,7 @@ abstract class EMongoDocument extends EMongoEmbeddedDocument
   {
     $class = get_class($this);
     $model = new $class(null);
+    /** @var EMongoDocument $model */
     $model->initEmbeddedDocuments();
     $model->setAttributes($attributes, false);
 
@@ -1594,6 +1592,7 @@ abstract class EMongoDocument extends EMongoEmbeddedDocument
     }
     else
     {
+      /** @var EMongoDocument $model */
       $model = self::$_models[$className] = new $className(null);
       $model->attachBehaviors($model->behaviors());
 

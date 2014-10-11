@@ -1,5 +1,7 @@
 <?php
-class UserAddress extends EMongoEmbeddedDocuemnt
+namespace Kozz\Tests\Model;
+
+class MongoModelUserAddress extends \EMongoEmbeddedDocument
 {
 	public $city;
 	public $street;
@@ -9,8 +11,8 @@ class UserAddress extends EMongoEmbeddedDocuemnt
 	public function rules()
 	{
 		return array(
-			array('city, street, house', 'length', 'max'=>255),
-			array('house, apartment, zip', 'length', 'max'=>10),
+			array('city, street'  , 'length', 'max'=>255),
+			array('apartment, zip', 'length', 'max'=>10),
 		);
 	}
 

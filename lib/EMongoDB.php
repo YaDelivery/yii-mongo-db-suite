@@ -123,7 +123,7 @@ class EMongoDB extends CApplicationComponent
    */
   public function connect()
   {
-    if (!$this->getConnection()->getHosts())
+    if (!$this->getConnection()->getConnections())
     {
       return $this->getConnection()->connect();
     }
@@ -206,12 +206,10 @@ class EMongoDB extends CApplicationComponent
   {
     if ($this->_mongoDb === null)
     {
-      return $this->_mongoDb = $this->getConnection()->selectDB($this->dbName);
+      $this->setDbInstance($this->dbName);
     }
-    else
-    {
-      return $this->_mongoDb;
-    }
+
+    return $this->_mongoDb;
   }
 
   /**
@@ -260,9 +258,24 @@ class EMongoDB extends CApplicationComponent
    * Drop the current DB
    *
    * @since v1.0
+   * @return array
    */
   public function dropDb()
   {
-    $this->_mongoDb->drop();
+    return $this->getDbInstance()->drop();
+  }
+
+  /**
+   * @since v1.5
+   * @return array
+   * @throws EMongoException
+   */
+  public function getDatabaseNames()
+  {
+    $dbs = $this->getConnection()->listDBs();
+    return array_filter($dbs['databases'], function(&$value){
+      $value = $value['name'];
+      return true;
+    });
   }
 }
