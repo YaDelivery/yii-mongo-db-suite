@@ -34,7 +34,7 @@ class EEmbeddedArraysBehavior extends EMongoDocumentBehavior
   public $arrayDocClassName;
 
   /**
-   * @var array|EMongoEmbeddedDocument[]
+   * @var null|array|EMongoEmbeddedDocument[]|
    */
   private $_cache;
 
@@ -68,6 +68,10 @@ class EEmbeddedArraysBehavior extends EMongoDocumentBehavior
   /**
    * @since v1.0
    * @see   CBehavior::attach()
+   *
+   * @param CComponent $owner
+   *
+   * @throws EMongoException
    */
   public function attach($owner)
   {
