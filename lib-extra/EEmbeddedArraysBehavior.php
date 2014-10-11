@@ -7,12 +7,13 @@
  * @copyright 2011 CleverIT http://www.cleverit.com.pl
  * @license   New BSD license
  * @version   1.3
- * @category  ext
- * @package   ext.YiiMongoDbSuite
  */
 
 /**
- * @since v1.0
+ * Class EEmbeddedArraysBehavior
+ *
+ *
+ * @method EMongoEmbeddedDocument getOwner()
  */
 class EEmbeddedArraysBehavior extends EMongoDocumentBehavior
 {
@@ -31,6 +32,10 @@ class EEmbeddedArraysBehavior extends EMongoDocumentBehavior
    * @since v1.0
    */
   public $arrayDocClassName;
+
+  /**
+   * @var array|EMongoEmbeddedDocument[]
+   */
   private $_cache;
 
   /**
@@ -46,20 +51,18 @@ class EEmbeddedArraysBehavior extends EMongoDocumentBehavior
     {
       return parent::events();
     }
-    else
-    {
-      // If attached to an embedded document these events are not defined
-      // and would throw an error if attached to
-      $events = parent::events();
-      unset($events['onBeforeSave']);
-      unset($events['onAfterSave']);
-      unset($events['onBeforeDelete']);
-      unset($events['onAfterDelete']);
-      unset($events['onBeforeFind']);
-      unset($events['onAfterFind']);
 
-      return $events;
-    }
+    // If attached to an embedded document these events are not defined
+    // and would throw an error if attached to
+    $events = parent::events();
+    unset($events['onBeforeSave']);
+    unset($events['onAfterSave']);
+    unset($events['onBeforeDelete']);
+    unset($events['onAfterDelete']);
+    unset($events['onBeforeFind']);
+    unset($events['onAfterFind']);
+
+    return $events;
   }
 
   /**
@@ -71,10 +74,9 @@ class EEmbeddedArraysBehavior extends EMongoDocumentBehavior
     // Test if we have correct embding class
     if (!is_subclass_of($this->arrayDocClassName, 'EMongoEmbeddedDocument'))
     {
-      throw new EMongoException(Yii::t(
-          'yii',
-          $this->arrayDocClassName . ' is not a child class of EMongoEmbeddedDocument.'
-        ));
+      throw new EMongoException(
+        Yii::t('yii', $this->arrayDocClassName . ' is not a child class of EMongoEmbeddedDocument.')
+      );
     }
 
     $this->_embeddedOwner = !($owner instanceof EMongoDocument);
@@ -88,6 +90,8 @@ class EEmbeddedArraysBehavior extends EMongoDocumentBehavior
    * Event: initialize array of embded documents
    *
    * @since v1.0
+   *
+   * @param $event
    */
   public function afterEmbeddedDocsInit($event)
   {
@@ -95,43 +99,15 @@ class EEmbeddedArraysBehavior extends EMongoDocumentBehavior
   }
 
   /**
-   * @since v1.0
-   */
-  private function parseExistingArray()
-  {
-    if (is_array($this->getOwner()->{$this->arrayPropertyName}))
-    {
-      $arrayOfDocs = array();
-      foreach ($this->getOwner()->{$this->arrayPropertyName} as $doc)
-      {
-        $obj = new $this->arrayDocClassName;
-        $obj->setAttributes($doc, false);
-        $obj->setOwner($this->getOwner());
-
-        // If any EEmbeddedArraysBehavior is attached,
-        // then we should trigger parsing of the newly set
-        // attributes
-        foreach (array_keys($obj->behaviors()) as $name)
-        {
-          $behavior = $obj->asa($name);
-          if ($behavior instanceof EEmbeddedArraysBehavior)
-          {
-            $behavior->parseExistingArray();
-          }
-        }
-        $arrayOfDocs[] = $obj;
-      }
-      $this->getOwner()->{$this->arrayPropertyName} = $arrayOfDocs;
-    }
-  }
-
-  /**
    * @since v1.0.2
+   *
+   * @param CEvent $event
    */
   public function afterValidate($event)
   {
     parent::afterValidate($event);
-    foreach ($this->getOwner()->{$this->arrayPropertyName} as $doc)
+
+    foreach ($this->getProperty() as $doc)
     {
       if (!$doc->validate())
       {
@@ -142,32 +118,93 @@ class EEmbeddedArraysBehavior extends EMongoDocumentBehavior
 
   public function beforeToArray($event)
   {
-    if (is_array($this->getOwner()->{$this->arrayPropertyName}))
-    {
-      $arrayOfDocs = array();
-      $this->_cache = $this->getOwner()->{$this->arrayPropertyName};
-
-      foreach ($this->_cache as $doc)
-      {
-        $arrayOfDocs[] = $doc->toArray();
-      }
-
-      $this->getOwner()->{$this->arrayPropertyName} = $arrayOfDocs;
-
-      return true;
-    }
-    else
+    if(!$this->checkProperty())
     {
       return false;
     }
+
+    $arrayOfDocs = array();
+    $this->_cache = $this->getProperty();
+
+    foreach ($this->_cache as $doc)
+    {
+      $arrayOfDocs[] = $doc->toArray();
+    }
+
+    $this->setProperty($arrayOfDocs);
+
+    return true;
   }
 
   /**
    * Event: re-initialize array of embedded documents which where toArray()ized by beforeSave()
+   *
+   * @param $event
    */
   public function afterToArray($event)
   {
-    $this->getOwner()->{$this->arrayPropertyName} = $this->_cache;
-    $this->_cache                                 = null;
+    $this->setProperty($this->_cache);
+    $this->_cache = null;
+  }
+
+  /**
+   * @since v1.0
+   */
+  private function parseExistingArray()
+  {
+    if(!$this->checkProperty())
+    {
+      return;
+    }
+
+    $arrayOfDocs = [];
+    foreach ($this->getProperty() as $doc)
+    {
+      $arrayOfDocs[] = $this->processSingleEmbed($doc);
+    }
+    $this->setProperty($arrayOfDocs);
+
+  }
+
+  private function processSingleEmbed(array $doc)
+  {
+    /** @var EMongoEmbeddedDocument $obj */
+    $obj = new $this->arrayDocClassName;
+    $obj->setAttributes($doc, false);
+    $obj->setOwner($this->getOwner());
+
+    foreach ($obj->behaviors() as $name => $value)
+    {
+      $behavior = $obj->asa($name);
+      if ($behavior instanceof EEmbeddedArraysBehavior)
+      {
+        $behavior->parseExistingArray();
+      }
+    }
+    return $obj;
+  }
+
+  /**
+   * @return bool
+   */
+  private function checkProperty()
+  {
+    return is_array($this->getProperty());
+  }
+
+  /**
+   * @return array|EMongoEmbeddedDocument[]
+   */
+  private function getProperty()
+  {
+    return $this->getOwner()->{$this->arrayPropertyName};
+  }
+
+  /**
+   * @param array $value
+   */
+  private function setProperty($value)
+  {
+    $this->getOwner()->{$this->arrayPropertyName} = $value;
   }
 }
