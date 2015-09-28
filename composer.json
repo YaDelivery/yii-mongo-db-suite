@@ -1,5 +1,5 @@
 {
-  "name": "kozz/yii-mongo-db-suite",
+  "name": "yadelivery/yii-mongo-db-suite",
   "description": "Almost complete, ActiveRecord like support for MongoDB",
   "keywords": ["Yii", "MongoDB", "EMongo", "YiiMongoDbSuite"],
   "license": "BSD-3-Clause",
@@ -24,7 +24,7 @@
     }
   },
   "require": {
-    "yiisoft/yii": "~1.1",
+    "yadelivery/yii": "dev-master",
     "php":">=5.3"
   },
   "suggest": {
@@ -36,5 +36,11 @@
     "phpunit/phpunit-selenium":"*",
     "phpunit/dbunit":"*",
     "phpunit/php-invoker":"*"
-  }
+  },
+  "repositories": [
+    {
+      "type": "git",
+      "url": "https://github.com/YaDelivery/yii.git"
+    }
+  ]
 }
