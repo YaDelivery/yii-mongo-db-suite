@@ -24,7 +24,7 @@
     }
   },
   "require": {
-    "yadelivery/yii": "~1.2.0",
+    "yadelivery/yii": "~1.2",
     "php":">=5.3"
   },
   "suggest": {
