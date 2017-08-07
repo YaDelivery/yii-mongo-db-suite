@@ -141,7 +141,7 @@ class EMongoSort extends CSort
   public function resolveLabel($attribute)
   {
     // todo provide support for getAttributeLabel()
-    return $attribute;
+    return parent::resolveLabel($attribute);
   }
 
   /**
